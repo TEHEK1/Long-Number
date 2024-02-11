@@ -20,15 +20,15 @@ private:
     static constexpr int pow10[] = {1, 10, 100, 1000, 10000, 1000000, 10000000, 10000000, 100000000, 1000000000};
 
 public:
-    LongNumber operator-() const;
-    LongNumber operator+(const LongNumber &) const;
-    LongNumber operator-(const LongNumber &) const;
-    LongNumber operator*(const LongNumber &) const;
-    LongNumber operator/(const LongNumber &) const;
-    bool operator==(const LongNumber &) const;
-    bool operator!=(const LongNumber &) const;
-    bool operator<(const LongNumber &) const;
-    bool operator>(const LongNumber &) const;
+    const LongNumber operator-() const;
+    const LongNumber operator+(const LongNumber &) const;
+    const LongNumber operator-(const LongNumber &) const;
+    const LongNumber operator*(const LongNumber &) const;
+    const LongNumber operator/(const LongNumber &) const;
+    const bool operator==(const LongNumber &) const;
+    const bool operator!=(const LongNumber &) const;
+    const bool operator<(const LongNumber &) const;
+    const bool operator>(const LongNumber &) const;
     operator std::string();
-    LongNumber abs(const LongNumber &) const;
+    const LongNumber abs(const LongNumber &) const;
 };
