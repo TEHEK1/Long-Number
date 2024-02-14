@@ -12,10 +12,9 @@ private:
     std::vector<int> _data;
     long long _accuracy;
     bool _is_negative;
-    int getOffset(const std::vector<int> &, const size_t, const size_t) const;
-    static constexpr int pow10[] = {1, 10, 100, 1000, 10000, 1000000, 10000000, 10000000, 100000000, 1000000000};
+    static constexpr int pow10[] = {1, 10, 100, 1000, 10000, 100000, 1000000, 10000000, 100000000, 1000000000};
     LongNumber() : _is_negative(false), _accuracy(DEFAULT_ACCURACY){};
-
+    LongNumber(long double);
 public:
     LongNumber(const LongNumber &) = default;
     friend LongNumber operator-(LongNumber lhs)
@@ -23,10 +22,10 @@ public:
         lhs._is_negative = !lhs._is_negative;
         return lhs;
     }
-    const LongNumber &operator+=(const LongNumber &);
-    const LongNumber &operator-=(const LongNumber &);
-    const LongNumber &operator*=(const LongNumber &);
-    const LongNumber &operator/=(const LongNumber &);
+    LongNumber &operator+=(const LongNumber &);
+    LongNumber &operator-=(const LongNumber &);
+    LongNumber &operator*=(const LongNumber &);
+    LongNumber &operator/=(const LongNumber &);
     friend LongNumber operator+(LongNumber lhs, const LongNumber &rhs)
     {
         lhs += rhs;
@@ -49,12 +48,12 @@ public:
     }
     friend bool operator==(const LongNumber &, const LongNumber &);
     friend bool operator<(const LongNumber &, const LongNumber &);
-    friend const LongNumber operator"" _L(const long double);
-    operator std::string();
-    const LongNumber abs(const LongNumber &) const;
+    friend LongNumber operator"" _L(long double);
+    explicit operator std::string() const;
+    static LongNumber abs(const LongNumber &) ;
 };
 inline bool operator>(const LongNumber &lhs, const LongNumber &rhs) { return rhs < lhs; }
 inline bool operator<=(const LongNumber &lhs, const LongNumber &rhs) { return !(lhs > rhs); }
 inline bool operator>=(const LongNumber &lhs, const LongNumber &rhs) { return !(lhs < rhs); }
 inline bool operator!=(const LongNumber &lhs, const LongNumber &rhs) { return !(lhs == rhs); }
-const LongNumber operator""_L(const long double);
+LongNumber operator""_L(long double);
