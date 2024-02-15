@@ -8,10 +8,11 @@
 int get(const std::vector<int> &vec, unsigned long long ind) {
     return ind < vec.size() ? vec.at(ind) : 0;
 }
-LongNumber::LongNumber(std::string numberStr){
+
+LongNumber::LongNumber(std::string numberStr) {
     _is_negative = numberStr.at(0) == '-';
     _accuracy = DEFAULT_ACCURACY;
-    if(numberStr.at(0) == '-'){
+    if (numberStr.at(0) == '-') {
         numberStr.erase(numberStr.begin());
     }
     if (std::find(numberStr.begin(), numberStr.end(), '.') == numberStr.end()) {
@@ -54,7 +55,8 @@ LongNumber &LongNumber::operator+=(const LongNumber &rhs) {
             _is_negative = rhs._is_negative;
         }
         for (size_t i = 0; i < _data.size(); i++) {
-            long long result =  sign * (static_cast<long long>(get(_data, i)) - get(rhs._data, i)) - static_cast<long long>(overflow);
+            long long result = sign * (static_cast<long long>(get(_data, i)) - get(rhs._data, i)) -
+                               static_cast<long long>(overflow);
             _data.at(i) = static_cast<int>((result + BASE) % BASE);
             overflow = result < 0;
         }
@@ -87,7 +89,7 @@ LongNumber &LongNumber::operator*=(const LongNumber &rhs) {
     _data.erase(_data.begin(), _data.begin() + _accuracy / BASEEXP);
     for (long long i = 0; i < _data.size(); i++) {
         _data.at(i) = _data.at(i) / pow10[_accuracy % BASEEXP] +
-                   (get(_data, i + 1) % pow10[_accuracy % BASEEXP]) * pow10[BASEEXP - _accuracy % BASEEXP];
+                      (get(_data, i + 1) % pow10[_accuracy % BASEEXP]) * pow10[BASEEXP - _accuracy % BASEEXP];
     }
     while (_data.size() > 1 && _data.back() == 0) {
         _data.pop_back();
@@ -159,7 +161,10 @@ LongNumber LongNumber::abs(const LongNumber &number) {
 
 LongNumber::operator std::string() const {
     std::stringstream ss;
-    for (long long i = static_cast<long long>(_data.size()) - 1; i >= 0 || ss.str().size() <= DEFAULT_ACCURACY; i--) {
+    for (long long i = static_cast<long long>(_data.size()) - 1; (i + 1) * BASEEXP < _accuracy; i++) {
+        ss << std::setw(BASEEXP) << std::setfill('0') << 0;
+    }
+    for (long long i = static_cast<long long>(_data.size()) - 1; i >= 0; i--) {
         ss << std::setw(BASEEXP) << std::setfill('0') << get(_data, i);
     }
     std::string result = ss.str();

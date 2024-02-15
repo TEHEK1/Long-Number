@@ -58,11 +58,10 @@ TEST_CASE("[LongNumber comparation operators]", "[All]") {
         double a = GENERATE(take(10, random(-1000.0, 1000.0)));
         REQUIRE(LongNumber(a) == LongNumber(a));
         REQUIRE(LongNumber(a) != LongNumber(a + 1));
-    }SECTION("< and > operators") {
+    }
+    SECTION("< and > operators") {
         int a = GENERATE(take(10, random(-1000.0, 1000.0)));
         int b = GENERATE(take(10, random(-1000.0, 1000.0)));
-        INFO(a);
-        INFO(b);
         REQUIRE((LongNumber(a) < LongNumber(b)) == (a < b));
         REQUIRE((LongNumber(a) > LongNumber(b)) == (a > b));
     }
