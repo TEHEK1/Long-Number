@@ -6,14 +6,14 @@
 #include <exception>
 
 int get(const std::vector<int> &vec, unsigned long long ind) {
-    return ind < vec.size() ? vec[ind] : 0;
+    return ind < vec.size() ? vec.at(ind) : 0;
 }
-
-LongNumber::LongNumber(const long double number) {
-    _is_negative = number < 0.0;
-    std::ostringstream sStream;
-    sStream << number;
-    std::string numberStr = sStream.str();
+LongNumber::LongNumber(std::string numberStr){
+    _is_negative = numberStr.at(0) == '-';
+    _accuracy = DEFAULT_ACCURACY;
+    if(numberStr.at(0) == '-'){
+        numberStr.erase(numberStr.begin());
+    }
     if (std::find(numberStr.begin(), numberStr.end(), '.') == numberStr.end()) {
         numberStr.push_back('.');
     }
@@ -24,10 +24,9 @@ LongNumber::LongNumber(const long double number) {
         numberStr.erase(numberStr.size() - (accuracy - _accuracy), accuracy - _accuracy);
     }
     numberStr.erase(std::remove(numberStr.begin(), numberStr.end(), '.'), numberStr.end());
-    _accuracy = DEFAULT_ACCURACY;
     _data = std::vector<int>((_accuracy - accuracy) / BASEEXP, 0);
     _data.push_back(0);
-    for (auto i = static_cast<long long>(numberStr.size()); i >= 0; i -= BASEEXP) {
+    for (auto i = static_cast<long long>(numberStr.size()); i > 0; i -= BASEEXP) {
         _data.back() += static_cast<int>((stoll(numberStr.substr(std::max(0ll, i - BASEEXP), std::min(BASEEXP, i))) *
                                           pow10[(_accuracy - accuracy) % BASEEXP]) %
                                          BASE);
@@ -44,8 +43,8 @@ LongNumber &LongNumber::operator+=(const LongNumber &rhs) {
     bool overflow = false;
     if (_is_negative == rhs._is_negative) {
         for (size_t i = 0; i < _data.size(); i++) {
-            long long result = get(_data, i) + get(rhs._data, i) + static_cast<int>(overflow);
-            _data[i] = static_cast<int>((result) % BASE);
+            long long result = get(_data, i) + get(rhs._data, i) + static_cast<long long>(overflow);
+            _data.at(i) = static_cast<int>((result) % BASE);
             overflow = result >= BASE;
         }
     } else {
@@ -55,8 +54,8 @@ LongNumber &LongNumber::operator+=(const LongNumber &rhs) {
             _is_negative = rhs._is_negative;
         }
         for (size_t i = 0; i < _data.size(); i++) {
-            long long result = (get(_data, i) * sign - get(rhs._data, i)) * sign - static_cast<int>(overflow);
-            _data[i] = static_cast<int>((result + BASE) % BASE);
+            long long result =  sign * (static_cast<long long>(get(_data, i)) - get(rhs._data, i)) - static_cast<long long>(overflow);
+            _data.at(i) = static_cast<int>((result + BASE) % BASE);
             overflow = result < 0;
         }
     }
@@ -79,14 +78,15 @@ LongNumber &LongNumber::operator*=(const LongNumber &rhs) {
     _is_negative = _is_negative ^ rhs._is_negative;
     for (size_t i = 0; i < copy._data.size(); i++) {
         for (size_t j = 0, overflow = 0; j < rhs._data.size() || overflow; ++j) {
-            long long result = get(_data, i + j) + static_cast<long long>(copy._data[i]) * get(rhs._data, j) + overflow;
-            _data[i + j] = int(result % BASE);
+            unsigned long long result = get(_data, i + j) + static_cast<unsigned long long>(copy._data.at(i)) *
+                                                            get(rhs._data, j) + overflow;
+            _data.at(i + j) = int(result % BASE);
             overflow = int(result / BASE);
         }
     }
     _data.erase(_data.begin(), _data.begin() + _accuracy / BASEEXP);
     for (long long i = 0; i < _data.size(); i++) {
-        _data[i] = _data[i] / pow10[_accuracy % BASEEXP] +
+        _data.at(i) = _data.at(i) / pow10[_accuracy % BASEEXP] +
                    (get(_data, i + 1) % pow10[_accuracy % BASEEXP]) * pow10[BASEEXP - _accuracy % BASEEXP];
     }
     while (_data.size() > 1 && _data.back() == 0) {
@@ -103,15 +103,15 @@ LongNumber &LongNumber::operator/=(const LongNumber &rhs) {
     _is_negative = false;
     LongNumber firstLeftGate = 0.1_L, leftGate = 0.5_L, rightGate = 1.0_L, two = 2.0_L, rCopy(rhs);
     while (rCopy < firstLeftGate) {
-        rCopy._data.insert(rCopy._data.cbegin(), 0);
-        _data.insert(_data.cbegin(), 0);
+        rCopy._data.insert(rCopy._data.begin(), 0);
+        _data.insert(_data.begin(), 0);
     }
     {
         LongNumber rightGateMultiplied = rightGate;
-        rightGateMultiplied._data.insert(rightGateMultiplied._data.cbegin(), 0);
+        rightGateMultiplied._data.insert(rightGateMultiplied._data.begin(), 0);
         while (rCopy > rightGateMultiplied) {
-            rCopy._data.erase(rCopy._data.cbegin());
-            _data.erase(_data.cbegin());
+            rCopy._data.erase(rCopy._data.begin());
+            _data.erase(_data.begin());
         }
     }
     while (rCopy > rightGate) {
@@ -123,7 +123,7 @@ LongNumber &LongNumber::operator/=(const LongNumber &rhs) {
         *this *= two;
     }
     LongNumber reverse = LongNumber(48.0 / 17.0) - LongNumber(32.0 / 17.0) * rCopy;
-    for (long long i = 1; i < 2 * _accuracy; i *= 2) {
+    for (long long i = 1; i < 4 * _accuracy; i *= 2) {
         reverse *= (two - reverse * rCopy);
     }
     _data = (*this * reverse)._data;
@@ -163,16 +163,16 @@ LongNumber::operator std::string() const {
         ss << std::setw(BASEEXP) << std::setfill('0') << get(_data, i);
     }
     std::string result = ss.str();
-
     result.insert(result.begin() + static_cast<long>(result.size()) - DEFAULT_ACCURACY, '.');
     long long nullsToRemove = 0;
-    for (long long i = 0; i + 1 < result.size() && result[i + 1] != '.' && result[i] == '0'; i++) {
+    for (long long i = 0; i + 1 < result.size() && result.at(i + 1) != '.' && result.at(i) == '0'; i++) {
         nullsToRemove = i + 1;
     }
     result.erase(result.begin(), result.begin() + nullsToRemove);
+    if (_is_negative) { result.insert(result.begin(), '-'); }
     return result;
 }
 
 LongNumber operator ""_L(const long double number) {
-    return {number};
+    return LongNumber(number);
 }

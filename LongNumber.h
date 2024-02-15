@@ -14,9 +14,10 @@ private:
     bool _is_negative;
     static constexpr int pow10[] = {1, 10, 100, 1000, 10000, 100000, 1000000, 10000000, 100000000, 1000000000};
     LongNumber() : _is_negative(false), _accuracy(DEFAULT_ACCURACY){};
-    LongNumber(long double);
 public:
+    explicit LongNumber(std::string);
     LongNumber(const LongNumber &) = default;
+    explicit LongNumber(long double number): LongNumber(std::to_string(number)){};
     friend LongNumber operator-(LongNumber lhs)
     {
         lhs._is_negative = !lhs._is_negative;
