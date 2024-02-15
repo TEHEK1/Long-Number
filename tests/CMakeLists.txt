@@ -10,4 +10,4 @@ FetchContent_MakeAvailable(Catch2)
 
 add_executable(Test Test.cpp)
 target_link_libraries(Test PRIVATE Catch2::Catch2WithMain LongNumber::library)
-add_test(NAME Pi COMMAND Test)
+add_test(NAME Functions COMMAND Test)
