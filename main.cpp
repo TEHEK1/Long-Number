@@ -1,6 +1,7 @@
 #include "LongNumber.h"
 #include <iostream>
-#include <algorithm>
+#include <chrono>
+#include <ctime>
 LongNumber countPi(int accuracy){
     LongNumber pow16 = 1._LN;
     LongNumber ln4 = 4._LN;
@@ -18,6 +19,18 @@ LongNumber countPi(int accuracy){
     }
     return  result;
 }
-int main() {
-    std::cout << std::string(countPi(100));
+int main(int argc, char* argv[]) {
+    int accuracy = 100;
+    if(argc >=2){
+        accuracy = std::stoi(argv[1]);
+    }
+    const std::clock_t c_start = std::clock();
+    auto t_start = std::chrono::high_resolution_clock::now();
+    std::cout<<std::string(countPi(accuracy)).substr(0,accuracy + 2);
+    const std::clock_t c_end = std::clock();
+    const auto t_end = std::chrono::high_resolution_clock::now();
+
+    std::cout << "\nCPU time used: "
+              << 1000.0 * (c_end - c_start) / CLOCKS_PER_SEC << "ms\n"
+              << "Wall clock time passed: " << std::chrono::duration<double, std::milli>(t_end - t_start).count() << "ms" << '\n';
 }

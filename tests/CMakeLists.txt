@@ -9,6 +9,6 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(Catch2)
 
 add_executable(Test Test.cpp)
-target_link_libraries(Test PRIVATE Catch2::Catch2WithMain LongNumber::library)
+target_link_libraries(Test PRIVATE Catch2::Catch2WithMain LongNumber)
 add_test(NAME Tests COMMAND Test --success)
-add_test(NAME piCounting COMMAND Main)
+add_test(NAME piCounting COMMAND piCounting)

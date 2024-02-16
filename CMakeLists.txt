@@ -4,8 +4,8 @@ project(LongNumber VERSION 1.0.0
     DESCRIPTION "Long Number realization"
     LANGUAGES CXX)
 add_library(LongNumber SHARED LongNumber.cpp LongNumber.h)
-add_executable(Main main.cpp)
-target_link_libraries( Main PRIVATE LongNumber)
+add_executable(PiCounting main.cpp)
+target_link_libraries(PiCounting PRIVATE LongNumber)
 include(CTest)
 add_subdirectory(tests)
 enable_testing()
