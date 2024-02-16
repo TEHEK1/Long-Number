@@ -9,6 +9,8 @@ int get(const std::vector<int> &vec, unsigned long long ind) {
     return ind < vec.size() ? vec.at(ind) : 0;
 }
 
+LongNumber::LongNumber() : _is_negative(false), _accuracy(DEFAULT_ACCURACY) {}
+
 LongNumber::LongNumber(std::string numberStr) {
     _is_negative = numberStr.at(0) == '-';
     _accuracy = DEFAULT_ACCURACY;
@@ -37,6 +39,64 @@ LongNumber::LongNumber(std::string numberStr) {
     if (_data.size() * BASEEXP > _accuracy + BASEEXP) {
         _data.pop_back();
     }
+}
+
+LongNumber::LongNumber(double number) : LongNumber(std::to_string(number)) {}
+
+LongNumber operator ""_LN(const char *number) {
+    return LongNumber(std::string(number));
+}
+
+LongNumber::operator std::string() const {
+    std::stringstream ss;
+    for (long long i = static_cast<long long>(_data.size()) - 1; (i + 1) * BASEEXP < _accuracy; i++) {
+        ss << std::setw(BASEEXP) << std::setfill('0') << 0;
+    }
+    for (long long i = static_cast<long long>(_data.size()) - 1; i >= 0; i--) {
+        ss << std::setw(BASEEXP) << std::setfill('0') << get(_data, i);
+    }
+    std::string result = ss.str();
+    result.insert(result.begin() + static_cast<long>(result.size()) - _accuracy, '.');
+    long long nullsToRemove = 0;
+    for (long long i = 0; i + 1 < result.size() && result.at(i + 1) != '.' && result.at(i) == '0'; i++) {
+        nullsToRemove = i + 1;
+    }
+    result.erase(result.begin(), result.begin() + nullsToRemove);
+    if (_is_negative) { result.insert(result.begin(), '-'); }
+    return result;
+}
+
+LongNumber::operator double() const {
+    return std::stod(std::string(*this));
+}
+
+LongNumber LongNumber::abs(const LongNumber &number) {
+    return number._is_negative ? -number : number;
+}
+
+LongNumber operator-(LongNumber lhs) {
+    lhs._is_negative = !lhs._is_negative;
+    return lhs;
+}
+
+LongNumber operator+(LongNumber lhs, const LongNumber &rhs) {
+    lhs += rhs;
+    return lhs;
+}
+
+LongNumber operator-(LongNumber lhs, const LongNumber &rhs) {
+    lhs -= rhs;
+    return lhs;
+}
+
+LongNumber operator*(LongNumber lhs, const LongNumber &rhs) {
+    lhs *= rhs;
+    return lhs;
+}
+
+LongNumber operator/(LongNumber lhs, const LongNumber &rhs) {
+    lhs /= rhs;
+    return lhs;
 }
 
 LongNumber &LongNumber::operator+=(const LongNumber &rhs) {
@@ -98,12 +158,11 @@ LongNumber &LongNumber::operator*=(const LongNumber &rhs) {
 }
 
 LongNumber &LongNumber::operator/=(const LongNumber &rhs) {
-    if (rhs == 0.0_L) {
+    if (rhs == 0.0_LN) {
         throw std::runtime_error("Can't divide by zero");
     }
-    bool is_negative = _is_negative;
-    _is_negative = false;
-    LongNumber firstLeftGate = 0.1_L, leftGate = 0.5_L, rightGate = 1.0_L, two = 2.0_L, rCopy(rhs);
+    LongNumber firstLeftGate = 0.1_LN, leftGate = 0.5_LN, rightGate = 1.0_LN, two = 2.0_LN, rCopy(rhs);
+    rCopy._is_negative = false;
     while (rCopy < firstLeftGate) {
         rCopy._data.insert(rCopy._data.begin(), 0);
         _data.insert(_data.begin(), 0);
@@ -129,7 +188,7 @@ LongNumber &LongNumber::operator/=(const LongNumber &rhs) {
         reverse *= (two - reverse * rCopy);
     }
     _data = (*this * reverse)._data;
-    _is_negative = is_negative ^ rhs._is_negative;
+    _is_negative ^= rhs._is_negative;
     return *this;
 }
 
@@ -155,29 +214,3 @@ bool operator==(const LongNumber &l, const LongNumber &r) {
     return true;
 }
 
-LongNumber LongNumber::abs(const LongNumber &number) {
-    return number._is_negative ? -number : number;
-}
-
-LongNumber::operator std::string() const {
-    std::stringstream ss;
-    for (long long i = static_cast<long long>(_data.size()) - 1; (i + 1) * BASEEXP < _accuracy; i++) {
-        ss << std::setw(BASEEXP) << std::setfill('0') << 0;
-    }
-    for (long long i = static_cast<long long>(_data.size()) - 1; i >= 0; i--) {
-        ss << std::setw(BASEEXP) << std::setfill('0') << get(_data, i);
-    }
-    std::string result = ss.str();
-    result.insert(result.begin() + static_cast<long>(result.size()) - DEFAULT_ACCURACY, '.');
-    long long nullsToRemove = 0;
-    for (long long i = 0; i + 1 < result.size() && result.at(i + 1) != '.' && result.at(i) == '0'; i++) {
-        nullsToRemove = i + 1;
-    }
-    result.erase(result.begin(), result.begin() + nullsToRemove);
-    if (_is_negative) { result.insert(result.begin(), '-'); }
-    return result;
-}
-
-LongNumber operator ""_L(const long double number) {
-    return LongNumber(number);
-}
