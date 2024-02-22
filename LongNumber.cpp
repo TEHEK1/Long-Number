@@ -32,7 +32,7 @@ LongNumber::LongNumber(std::string numberStr) {
     for (auto i = static_cast<long long>(numberStr.size()); i > 0; i -= BASEEXP) {
         _data.back() += static_cast<int>((stoll(numberStr.substr(std::max(0ll, i - BASEEXP), std::min(BASEEXP, i))) *
                                           pow10[(_accuracy - accuracy) % BASEEXP]) %
-                                         BASE);
+                                         base);
         _data.push_back(static_cast<int>(stoll(numberStr.substr(std::max(0ll, i - BASEEXP), std::min(BASEEXP, i))) /
                                          pow10[BASEEXP - (_accuracy - accuracy) % BASEEXP]));
     }
@@ -105,8 +105,8 @@ LongNumber &LongNumber::operator+=(const LongNumber &rhs) {
     if (_is_negative == rhs._is_negative) {
         for (size_t i = 0; i < _data.size(); i++) {
             long long result = get(_data, i) + get(rhs._data, i) + static_cast<long long>(overflow);
-            _data.at(i) = static_cast<int>((result) % BASE);
-            overflow = result >= BASE;
+            _data.at(i) = static_cast<int>((result) % base);
+            overflow = result >= base;
         }
     } else {
         char sign = 1;
@@ -117,7 +117,7 @@ LongNumber &LongNumber::operator+=(const LongNumber &rhs) {
         for (size_t i = 0; i < _data.size(); i++) {
             long long result = sign * (static_cast<long long>(get(_data, i)) - get(rhs._data, i)) -
                                static_cast<long long>(overflow);
-            _data.at(i) = static_cast<int>((result + BASE) % BASE);
+            _data.at(i) = static_cast<int>((result + base) % base);
             overflow = result < 0;
         }
     }
@@ -142,8 +142,8 @@ LongNumber &LongNumber::operator*=(const LongNumber &rhs) {
         for (size_t j = 0, overflow = 0; j < rhs._data.size() || overflow; ++j) {
             unsigned long long result = get(_data, i + j) + static_cast<unsigned long long>(copy._data.at(i)) *
                                                             get(rhs._data, j) + overflow;
-            _data.at(i + j) = int(result % BASE);
-            overflow = int(result / BASE);
+            _data.at(i + j) = int(result % base);
+            overflow = int(result / base);
         }
     }
     _data.erase(_data.begin(), _data.begin() + _accuracy / BASEEXP);

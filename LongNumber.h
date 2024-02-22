@@ -3,7 +3,6 @@
 #include <string>
 #include <list>
 #define BASEEXP 9ll
-#define BASE 1000000000
 #define DEFAULT_ACCURACY 110
 
 class LongNumber
@@ -12,8 +11,9 @@ private:
     std::vector<int> _data;
     long long _accuracy;
     bool _is_negative;
-    static constexpr int pow10[] = {1, 10, 100, 1000, 10000,
+    static constexpr long long pow10[] = {1, 10, 100, 1000, 10000,
                                     100000, 1000000, 10000000, 100000000, 1000000000};
+    static constexpr long long base = pow10[BASEEXP];
     LongNumber();
 public:
     explicit LongNumber(std::string);
